@@ -1,148 +1,180 @@
-#ifndef LISTA_H
-#define LISTA_H
+#ifndef LISTAORDENADA_H
+#define LISTAORDENADA_H
 #include <iostream>
 
-using namespace std;
+using namespace std; 
 
 template <class T>
 struct nodo {
-	int clave;
-	T Dato;
-    nodo<T> * sig;};
-
-
-template <class T>
-class lista{nodo <T> *cab;
-			int tam;
-			
-	public: lista(){cab=NULL;}
-			bool lista_vacia();
-			void insertar(int Clave, T info);
-			void imprimir();
-			void borrar(int Clave);
-			bool enLista(int Clave);
-			void cambiar(int Clave, T infoNueva);	
-			nodo<T> buscar (int Clave);
+    int clave;
+    T info;
+    nodo <T> *sig;
 };
 
 template <class T>
-void lista <T>::insertar(int Clave, T info)
-{
-    nodo<T> *nuevo = new nodo<T>;
-    nuevo->clave = Clave;
-    nuevo->Dato = info;
-    nuevo->sig = NULL;
-    if (cab == NULL) 
-    {cab = nuevo;
-    }
-    else 
-    {
-        if (Clave<cab->clave) 
-        {
-            nuevo->sig = cab;
-            cab = nuevo;
-        }
-        else 
-        {
-            nodo<T> *aux = cab;
-            nodo<T> *atras = cab;
-            while (Clave >= aux->clave && aux->sig != NULL) 
-            {
-                atras = aux;
-                aux = aux->sig;
-            }if (Clave >= aux->clave){
-                aux->sig = nuevo;
-            }else{
-                nuevo->sig = aux;
-                atras->sig = nuevo;
-            }
-        }
-    }
-}
+class listaord{nodo<T> *cabeza, *centinel;
+               int tam;
+               int infinito = 999999;
+
+    public: listaord(){cabeza = new nodo <T>;
+                       centinel = new nodo <T>;
+
+                       cabeza->sig = centinel;
+                       centinel-> sig = centinel;
+                       centinel->clave = infinito;
+
+                       tam = 0;}
+
+        bool lista_vacia();
+        void insertar(int cla, T inf);
+        void borrar(int cla);
+        void buscar (int cla);
+        bool pertenece (int cla);    
+        void recorrer();
+        void asignarInfo(int cla, T inf);
+        int siguiente(int cla);
+        int anterior(int cla);   
+};
+
 
 template <class T>
-bool lista<T>::lista_vacia()
-{if(cab==NULL)
-    return true;
+bool listaord<T>::lista_vacia()
+{if(cabeza->sig ==centinel)
+    return false;
  else
- 	return false;
+    //cout<<"Tamaño de la lista: "<<tam<<endl;
+    return true;
+}
+
+template <class T> 
+void listaord <T>::insertar(int cla , T inf){
+    nodo <T> *ant, *pos, *nuevo;
+
+    nuevo = new nodo <T>;
+    nuevo->clave = cla;
+    nuevo->info = inf;
+
+    ant = cabeza;
+    pos = cabeza->sig;
+
+    while (nuevo->clave > pos->clave){
+        ant=pos;
+        pos= ant->sig;
+    }
+
+    ant->sig= nuevo;
+    nuevo->sig= pos;
+
+    tam++;
 }
 
 template <class T>
-bool lista<T>::enLista(int Clave){
-	bool esta = false;
-	nodo<T> *aux;
-	aux = cab;
-	while(aux != NULL){
-		if(Clave == aux->clave){
-			esta = true;
-			break;
-		}else{
-			aux = aux->sig;
-		}
-	}
-	return esta;
+void listaord<T>::buscar(int cla)
+{   nodo<T> *cent = cabeza;
+    nodo <T> *salida = NULL;
+
+    while (cla != cent->clave && cent->sig!=centinel)
+    {
+        cent = cent->sig;
+    }
+
+    salida = cent;
+
+    if (cla==cent->clave) cout<<"La informacion en <"<<cla << "> es: "<<salida->info<<endl;
+    else if (cent->sig == centinel) cout<<"La clave <"<<cla << "> no existe."<<endl;
+    else cout<<"La informacion en <"<<cla << "> es: "<<salida->info<<endl;
+}
+
+
+template <class T>
+void listaord<T>::borrar(int cla){ 
+    nodo <T> *ant, *pos;
+
+    ant = cabeza;
+    pos = cabeza->sig;
+
+    while (cla !=pos->clave && pos->sig != centinel) 
+    {
+        ant=pos;
+        pos= ant->sig;
+    }
+
+    if (cla==pos->clave) 
+    {
+        ant->sig= pos->sig;
+        tam--;
+        delete pos;
+    }else cout<<"No se puede eliminar, el codigo no existe."<<endl;   
+
+}
+
+template<class T>
+bool listaord<T>::pertenece(int cla)
+{
+    nodo<T> *cent = cabeza;
+    while (cla != cent->clave && cent->sig!=centinel){cent = cent->sig;}
+
+    if (cla==cent->clave) return true;
+    else if (cent->sig == centinel) return false;
+    else return true;
 }
 
 template <class T>
-nodo<T> lista<T>::buscar(int Clave)
-{   nodo <T> *aux=cab, *salida=NULL;
-	    while(aux != NULL)
+void listaord<T>::recorrer()
+{   
+    nodo <T> *cent = cabeza->sig;
+	    while(cent != centinel)
     		{
-    		if(Clave == aux->clave){
-    			salida = aux;
-    			cout<<"Clave: <"<<Clave<<"> Dato: ";
-    			break;
-    		}else{
-				aux = aux->sig;
+			cout<<"Clave: <"<<cent->clave<<"> ";
+    		cout<<"Informacion: "<<cent->info<<endl;
+			cent = cent->sig;
 			}
-		
-		}
-	return *salida;
 }
 
 template <class T>
-void lista<T>::borrar(int Clave){ 
-    nodo <T> *temp, *atras;
-    temp = cab;
-	if(Clave == cab->clave){
-		cab = temp->sig;
-        delete temp;
-	}else
-	{
-    while(Clave != temp->sig->clave){
-			temp = temp->sig;
-			}          
-    nodo <T> *aux;
-	aux = temp->sig;
-    temp->sig = aux->sig;
-    delete aux;
-	tam--;
-	}
+int  listaord<T>::siguiente(int cla)
+{   nodo<T> *cent = cabeza;
+    nodo<T> *pos; 
+    
+    while (cla != cent->clave && cent->sig!=centinel)
+    {
+        cent = cent->sig;
+    }
+
+    pos = cent->sig;
+
+    if (pos->clave==infinito)return -1;
+    else return pos->clave;
 }
 
 template <class T>
-void lista<T>::imprimir()
-{   nodo <T> *aux=cab;
-	    while(aux != NULL)
-    		{
-			cout<<"Clave: <"<<aux->clave<<"> ";
-    		cout<<"Dato: "<<aux->Dato<<endl;
-			aux = aux->sig;
-			}
+int  listaord<T>::anterior(int cla)
+{   nodo <T> *ant, *pos;
+
+    ant = cabeza;
+    pos = cabeza->sig;
+
+    while (cla !=pos->clave && pos->sig != centinel) 
+    {
+        ant = pos;
+        pos = pos->sig;
+    }
+
+    if (ant->clave==0) return -1;
+    else if (cla==pos->clave) return ant->clave; 
+    else return -1;   
 
 }
 
 template <class T>
-void lista<T>::cambiar(int Clave, T infoNueva){
-    nodo <T> *temp;
-    temp = cab;
-    while(Clave != temp->clave){
-			temp = temp->sig;
-			}          
-	temp->Dato = infoNueva;
-	}
+void listaord<T>::asignarInfo(int cla , T inf )
+{   
+    nodo<T> *cent = cabeza;
 
-	
+    while (cla != cent->clave && cent->sig!=centinel){cent = cent->sig;}
+
+    if (cla == cent->clave) cent->info = inf;
+}
+
 
 #endif
